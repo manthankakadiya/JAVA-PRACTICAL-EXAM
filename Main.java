@@ -1,56 +1,94 @@
 import java.util.Scanner;
 
-public class Main {
+class Product {
+    private final String name;
+    private final int price;
+
+    Product(String name, int price) {
+        this.name = name;
+        this.price = price;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public int getPrice() {
+        return price;
+    }
+
+    public static Product findProduct(char code) {
+        return switch (code) {
+            case 'N' -> new Product("Notebook", 45);
+            case 'P' -> new Product("Pen", 10);
+            case 'M' -> new Product("Marker", 25);
+            case 'F' -> new Product("File", 30);
+            default -> null;
+        };
+    }
+}
+
+class Purchase {
+    private int receiptNo;
+    private Product product;
+    private int quantity;
+
+    private static int nextReceipt = 201;
+    private static int totalPurchases = 0;
+    private static int totalRevenue = 0;
+
+    Purchase(Product product, int quantity) {
+        this.product = product;
+        this.quantity = quantity;
+        this.receiptNo = nextReceipt++;
+
+        totalPurchases++;
+        totalRevenue += getAmount();
+    }
+
+    public int getAmount() {
+        return product.getPrice() * quantity;
+    }
+
+    public static int getTotalPurchases() {
+        return totalPurchases;
+    }
+
+    public static int getTotalRevenue() {
+        return totalRevenue;
+    }
+
+    public String toString() {
+        return "Receipt " + receiptNo + ": "
+                + product.getName() + " x " + quantity
+                + " = " + getAmount();
+    }
+}
+
+public class Main{
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
 
-        String sentence = sc.nextLine();
-        String keyword = sc.nextLine();
+        int n = sc.nextInt();
 
-        sentence = sentence.trim();
-        String[] words = sentence.split(" +");
+        for (int i = 0; i < n; i++) {
+            char code = sc.next().charAt(0);
+            int quantity = sc.nextInt();
 
-        StringBuilder cleaned = new StringBuilder();
-        int shortest = words[0].length();
-        String shortestWord = words[0].toLowerCase();
-        int keywordCount = 0;
-        int vowelCount = 0;
+            Product p = Product.findProduct(code);
 
-        for (int i = 0; i < words.length; i++) {
-            String word = words[i].toLowerCase();
-
-            if (i > 0) {
-                cleaned.append(" ");
-            }
-
-            cleaned.append(word);
-
-            if (word.length() < shortest) {
-                shortest = word.length();
-                shortestWord = word;
-            }
-
-            if (word.equalsIgnoreCase(keyword)) {
-                keywordCount++;
+            if (p == null || quantity <= 0) {
+                System.out.println("Invalid item: " + code + " " + quantity);
+            } else {
+                Purchase purchase = new Purchase(p, quantity);
+                System.out.println(purchase);
             }
         }
 
-        cleaned.setCharAt(0, Character.toUpperCase(cleaned.charAt(0)));
-
-        for (int i = 0; i < sentence.length(); i++) {
-            char ch = Character.toLowerCase(sentence.charAt(i));
-
-            if (ch == 'a' || ch == 'e' || ch == 'i' ||
-                ch == 'o' || ch == 'u') {
-                vowelCount++;
-            }
-        }
-
-        System.out.println("Sentence: " + cleaned);
-        System.out.println("Words: " + words.length);
-        System.out.println("Shortest word: " + shortestWord);
-        System.out.println("Keyword count: " + keywordCount);
-        System.out.println("Vowels: " + vowelCount);
+        System.out.println("Total receipts: "
+                + Purchase.getTotalPurchases()
+                + ", Total revenue: "
+                + Purchase.getTotalRevenue());
 
         sc.close();
     }
